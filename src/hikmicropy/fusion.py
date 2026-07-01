@@ -517,18 +517,19 @@ def process(ir_jpeg: str, vis_jpeg: str, out_prefix: str,
     cv2.imwrite(outs["fusion"], fused)
 
     if html:
-        from .plotly_export import export_plotly_html, lut_to_plotly_colorscale
+        from .plotly_export import export_plotly_html
 
         temperature_c = None
         if t_min is not None and t_max is not None:
             temperature_c = ext.to_celsius(t_min, t_max)
-        colorscale = lut_to_plotly_colorscale(_LUTS.get(palette, _LUTS["arctic"]))
+        # HTML の背景は fusion 画像（外形エッジ融合済み）。その上に透明な hover 格子を
+        # 重ね、各画素の raw/温度をマウスオーバーで読めるようにする。
         export_plotly_html(
             raw,
             outs["thermal_html"],
             temperature_c=temperature_c,
-            colorscale=colorscale,
-            title=f"{palette} thermal data",
+            background_rgb=cv2.cvtColor(fused, cv2.COLOR_BGR2RGB),
+            title=f"{palette} fusion (hover for temperature)",
             include_plotlyjs=True if html_embed_js else "cdn",
         )
 

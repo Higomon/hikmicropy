@@ -2,43 +2,56 @@
 
 [日本語](README.md) ・ **English**
 
-**Extract real temperatures from HIKMICRO Pocket2 thermal photos, then colorize and analyze them in Python.**
+A Python package that extracts per-pixel temperature data from HIKMICRO Pocket2 radiometric
+JPEG files and produces detail-fused images and interactive temperature maps.
 
-A photo taken with a HIKMICRO Pocket2 thermal camera (`HM****.jpeg`) hides a **per-pixel
-temperature array** inside the file, in addition to the picture you see. `hikmicropy` recovers
-it, converts it to real degrees Celsius, and produces color-mapped images and an interactive
-chart you can hover to read temperatures. It is handy for tasks like water-leak inspection,
-where you look for spots that are *colder than their surroundings* (i.e. damp).
+A `HM****.jpeg` saved by the HIKMICRO Pocket2 embeds a per-pixel raw sensor array (radiometric
+data) in addition to the display image. The raw values are not temperatures on their own, so the
+tool extracts them and calibrates to degrees Celsius using the temperature scale bar burned into
+the photo. The intended use is detecting relatively cold regions on surfaces (e.g. moisture from
+water leaks).
 
-![Overview](docs/images/overview.png)
+## Example output
 
-## What it does (3 steps)
+`process` **produces the visible image and the fusion image as a pair**. The fusion image overlays
+the visible edges on the thermal color map, so structure and temperature can be read together.
+**Unlike the camera's own export, the output images carry no HIKMICRO logo.**
 
-1. **① Extract the raw data** — read the embedded temperature array (256×192) from the JPEG. On its own it is not degrees.
-2. **② Convert to temperature and colorize** — use the Max/Min °C scale bar the camera burns into the image to turn each pixel into real °C, then color it for readability.
-3. **③ Highlight the cold spot** — automatically locate the coldest region (e.g. a damp/leak candidate).
+| Visible (aligned to the IR frame) | Fusion (thermal color + structural edges) |
+|---|---|
+| ![visible](samples/example_visible.png) | ![fusion](samples/example_fusion.png) |
+
+The Max/Min scale bar is shown top-left and the capture time bottom-right. Structural edges come
+from the visible image; the thermal hue (temperature) is preserved.
 
 ## Features
 
-- Extract the **raw thermal array (256×192 `uint16`)** from the embedded `HDRI` block.
-- Convert to **real temperature (°C)** with a per-image two-point linear calibration from the scale bar.
-- Crop and align the visual image to the IR frame and build a **detail-fused image** (scale + translation only; no false rotation).
-- **Selectable color palettes** (default `arctic`, which shows cold/damp areas in blue).
-- Export an **interactive Plotly HTML** heatmap with raw / temperature hover values.
-- Write processing **metadata as JSON** (including OCR confidence).
+- Extract the **raw sensor array (256×192 `uint16`)** from the radiometric JPEG.
+- Convert to °C with an **image-specific two-point linear calibration** from the scale bar.
+- Align the visible image to the IR frame (scale + translation only, no rotation) and **fuse the
+  structural edges**.
+- **Output the visible and fusion images together** (fusion requires the visible image).
+- **Selectable color palettes** (default `arctic`, which renders cold/damp areas in blue).
+- Export an **interactive HTML (Plotly) using the fusion image as the background**, where
+  **hovering over any point reports that pixel's estimated temperature and raw value**.
+- Record processing metadata (calibration provenance, OCR agreement) as JSON.
+- Produce output images **without any manufacturer logo**.
 
 ## Color palettes
 
-Choose the look with `--palette`. To make cold (damp) areas stand out, the default `arctic` is the clearest.
+Select with `--palette`. The default `arctic` best highlights cold (damp) regions.
 
-![Color palettes](docs/images/palettes.png)
+![Color palettes](docs/images/palettes.en.png)
 
-## Install
+## Installation
+
+All dependencies are common to Windows, macOS, and Linux; **no platform-specific environment file
+is required.**
 
 ### conda
 
 ```bash
-conda env create -f environment.yml
+conda env create -f environment.yml   # same file on all three OSes
 conda activate hikmicropy
 pip install -e .
 ```
@@ -47,34 +60,38 @@ pip install -e .
 
 ```bash
 pip install -e .            # core
-pip install -e ".[viz]"     # + matplotlib for HikmicroExtractor.plot()
+pip install -e ".[viz]"     # + matplotlib (optional, for HikmicroExtractor.plot)
 ```
 
-### Tesseract (optional, for OCR)
+### Tesseract (only if using OCR, optional)
 
-Reading the burned-in scale bar with OCR needs the Tesseract binary:
+The Tesseract binary is needed only to read the scale bar by OCR.
+
+| OS | Install |
+|---|---|
+| Windows | `conda install -c conda-forge tesseract`, or the UB Mannheim installer |
+| macOS | `brew install tesseract` |
+| Linux | `apt install tesseract-ocr`, etc. |
+
+OCR is optional. Temperatures can be supplied with `--tmin/--tmax`, which is recommended for
+quantitative work.
+
+## Usage
 
 ```bash
-brew install tesseract      # macOS
-```
-
-OCR is optional. For quantitative work, prefer passing `--tmin/--tmax` manually.
-
-## CLI
-
-```bash
-# One IR/VIS pair
+# One IR/VIS pair (writes fusion, visible, metadata, and HTML)
 hikmicropy process IR.jpeg IR.VIS.jpeg --palette arctic --out-dir output --html
 
-# A whole folder (auto-pairs HM*.jpeg with HM*.VIS.jpeg)
+# Batch a folder (auto-pairs HM*.jpeg with HM*.VIS.jpeg)
 hikmicropy batch ./photos --palette arctic --out-dir output --html
 
-# CSV / HTML from a single IR image (no VIS needed)
+# CSV / HTML from a single IR image (no VIS; fusion is not produced)
 hikmicropy export IR.jpeg --tmin 31.4 --tmax 33.8 --csv --html
 ```
 
-Outputs per image: `*_fusion.png`, `*_visible.png`, `*_metadata.json`, and (with `--html`)
-`*_thermal.html`.
+`process` writes `*_fusion.png`, `*_visible.png`, and `*_metadata.json` per pair, adding
+`*_thermal.html` with `--html`. **A visible image (`*.VIS.jpeg`) is required to obtain the
+edge-fused image**; without it, use `export` (CSV/HTML only).
 
 ## Python API
 
@@ -88,51 +105,26 @@ temp_c = ext.to_celsius(t_min=31.4, t_max=33.8)   # degC
 process("IR.jpeg", "IR.VIS.jpeg", "output/scene01", palette="arctic", html=True)
 ```
 
-## Temperature calibration — read this
+## Temperature calibration
 
-The raw `HDRI` values are **not** degrees Celsius. HIKMICRO computes temperature with a
-proprietary radiometric model and burns the resulting scale-bar range (e.g. `31.4–33.8 °C`)
-into the display image. `hikmicropy` recovers degrees with a **per-image two-point linear
-calibration**, anchoring each frame to its own scale-bar `t_min/t_max`:
+Raw values are not °C. The tool applies a **per-image two-point linear calibration** anchored to
+that image's Max/Min scale bar:
 
 ```
-T(°C) = t_min + (raw - raw_min) / (raw_max - raw_min) * (t_max - t_min)
+T(°C) = t_min + (raw − raw_min) / (raw_max − raw_min) × (t_max − t_min)
 ```
 
-Key facts (measured):
-
-- **Calibration must be per-image.** A single global `raw → °C` formula does **not** work: the
-  raw sensor baseline drifts from shot to shot, so the same raw value maps to different
-  temperatures in different frames. Re-anchoring each frame to its own scale bar absorbs that.
-- **Anchors are exact; the in-between is expected-good but unmeasured.** Accuracy for pixels
-  *between* the anchors (intra-image linearity) is physically expected to be excellent over a
-  few-degree span but is not yet measured — it needs ≥3 known temperatures in one frame.
+- **Calibration must be per-image.** A single global conversion does not hold: the sensor baseline
+  drifts between shots, so the same raw value maps to different temperatures across images.
+- **The two anchor points match exactly, but accuracy between them is unverified.** A linear
+  approximation is expected to be adequate over a few-degree span, but precise quantification
+  requires known-temperature reference bodies or the vendor's per-pixel CSV.
 - This is not a manufacturer-published radiometric formula.
 
-### Getting `t_min/t_max`
-
-1. **Manual (recommended for quantitative use):** pass `--tmin/--tmax` read from the image.
-2. **OCR (convenience):** if omitted, `hikmicropy` OCRs the burned-in scale bar. This is fitted
-   to the **Pocket2 overlay layout** and may miss on other models/resolutions, in which case it
-   falls back to uncalibrated raw. The recorded `ocr_confidence` is the **OCR agreement ratio**,
-   not a measure of temperature correctness.
-
-### Validating accuracy (optional)
-
-- `hikmicropy.calibration` can compare the extracted raw against a **HIKMICRO Analyzer** per-pixel
-  temperature CSV and report RMSE / max error.
-- Without Analyzer, put **two known-temperature reference bodies** (e.g. ice water ≈ 0 °C and a
-  measured warm object) in one frame to obtain ≥3 known temperatures and check intra-image linearity.
-
-## Tests
-
-```bash
-pytest -q
-```
-
-Core extraction and calibration are tested against a synthetic HDRI fixture (no field images
-required). OCR logic is tested with mocked candidates, so Tesseract is not needed for the suite.
+Provide the scale via `--tmin/--tmax` (recommended) or OCR. OCR assumes the **Pocket2 overlay
+layout** and may fail on other models/resolutions. The recorded `ocr_confidence` is an OCR
+agreement ratio, not a guarantee of temperature correctness.
 
 ## License
 
-MIT. See `LICENSE`.
+MIT (see `LICENSE`).

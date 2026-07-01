@@ -25,5 +25,10 @@ HM*.jpeg
 HM*.jpg
 calibration/analyzer_csv/*.csv
 
+# 公開用の匿名サンプル・READMEデモ画像は追跡する（上の除外を打ち消す）
+!samples/
+!samples/*.png
+!docs/images/*.png
+
 # OS
 .DS_Store
