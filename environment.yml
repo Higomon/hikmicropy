@@ -1,0 +1,15 @@
+name: hikmicropy
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - opencv                # conda では headless 区別なし。pip 版は opencv-python-headless
+  - pillow
+  - plotly
+  - pytesseract
+  - pytest
+  - matplotlib            # HikmicroExtractor.plot() 用（コア経路では不要）
+  - pip
+  - pip:
+      - build

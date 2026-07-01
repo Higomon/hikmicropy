@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.venv/
+
+# 出力・生成物
+output/
+*_fusion.png
+*_visible.png
+*_thermal.png
+*_thermal.html
+*_metadata.json
+*_thermal.csv
+*_raw.csv
+
+# ローカル実測画像・現場データ（公開しない）
+*.VIS.jpeg
+HM*.jpeg
+HM*.jpg
+calibration/analyzer_csv/*.csv
+
+# OS
+.DS_Store

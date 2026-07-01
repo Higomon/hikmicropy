@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hikmicropy"
+version = "0.1.0"
+description = "Extract, fuse, and analyze HIKMICRO Pocket2 radiometric JPEG images."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Higomon" }]
+keywords = ["HIKMICRO", "thermal", "radiometric", "infrared", "thermography"]
+dependencies = [
+  "numpy",
+  "opencv-python-headless",
+  "pillow",
+  "plotly",
+  "pytesseract",
+]
+
+[project.optional-dependencies]
+viz = ["matplotlib"]              # HikmicroExtractor.plot() の単体ヒートマップ用（コア経路では不要）
+test = ["pytest"]
+
+[project.scripts]
+hikmicropy = "hikmicropy.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Higomon/hikmicropy"
+Repository = "https://github.com/Higomon/hikmicropy"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
