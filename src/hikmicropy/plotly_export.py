@@ -111,7 +111,7 @@ def _write_fusion_overlay_html(
         raise ValueError(f"background_rgb must be H×W×3 RGB, got {bg.shape}")
     bh, bw = bg.shape[:2]
     h, w = raw_f.shape
-    # 生データ格子(w×h)を fusion 画像(bw×bh)の全面に重ねる（セル中心を等間隔配置）。
+    # 生データ格子(w×h)を合成画像(bw×bh)の全面に重ねる（セル中心を等間隔配置）。
     dx, dy = bw / w, bh / h
 
     if temperature_c is not None:

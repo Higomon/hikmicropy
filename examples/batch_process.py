@@ -4,7 +4,7 @@
     python examples/batch_process.py <入力フォルダ> <出力フォルダ> [パレット]
 
 <入力フォルダ> 内の HM*.jpeg（IR）と HM*.VIS.jpeg（可視光）を自動ペアリングし、
-arctic フュージョン画像・可視光整列画像・metadata・Plotly HTML を出力する。
+arctic 合成画像・可視光整列画像・metadata・Plotly HTML を出力する。
 CLI `hikmicropy batch` と同等。ライブラリ API の利用例として置いている。
 """
 

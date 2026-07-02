@@ -1,7 +1,7 @@
 """hikmicropy コマンドラインインターフェース.
 
 サブコマンド:
-  process  IR/VIS ペア1組から fusion + visible + metadata (+ html) を出力。
+  process  IR/VIS ペア1組から合成画像 + visible + metadata (+ html) を出力。
   batch    フォルダ内の HM*.jpeg / HM*.VIS.jpeg を自動ペアリングして一括処理。
   export   IR 1枚から生値/温度 CSV と Plotly HTML を出力（VIS 不要）。
 
@@ -94,7 +94,7 @@ def _add_temp_args(p: argparse.ArgumentParser) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="hikmicropy",
-        description="HIKMICRO Pocket2 放射温度JPEG の抽出・フュージョン・解析",
+        description="HIKMICRO Pocket2 放射温度JPEG の抽出・合成・解析",
     )
     sub = parser.add_subparsers(dest="command", required=True)
 

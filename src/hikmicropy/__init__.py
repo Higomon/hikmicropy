@@ -1,9 +1,9 @@
-"""hikmicropy: HIKMICRO Pocket2 放射温度JPEG の抽出・フュージョン・温度解析.
+"""hikmicropy: HIKMICRO Pocket2 放射温度JPEG の抽出・合成・温度解析.
 
 主な公開API:
   - HikmicroExtractor: JPEG 末尾の HDRI ブロックから生ラジオメトリ(256x192 uint16)を抽出。
   - to_celsius(t_min, t_max): スケールバー2点による per-image 線形較正（唯一の較正法）。
-  - process(...): VIS を IR 画角に整列し arctic フュージョン画像 + 温度凡例 + metadata を出力。
+  - process(...): VIS を IR 画角に整列し arctic 合成画像 + 温度凡例 + metadata を出力。
   - export_plotly_html(...): raw/温度を hover できる Plotly HTML を出力。
 
 温度較正の要点:

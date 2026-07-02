@@ -50,6 +50,11 @@ the visible edges on the thermal color map, so structure and temperature can be 
 The Max/Min scale bar is shown top-left and the capture time bottom-right. Structural edges come
 from the visible image; the thermal hue (temperature) is preserved.
 
+With `--html`, the package also writes a Plotly HTML view over the fusion image. Hovering over the
+image shows the nearest pixel's estimated temperature and raw value in a tooltip.
+
+![Plotly HTML temperature hover](docs/images/plotly_hover.gif)
+
 ## Features
 
 - Extract the **raw sensor array (256×192 `uint16`)** from the radiometric JPEG.

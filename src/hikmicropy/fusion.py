@@ -1,4 +1,4 @@
-"""HIKMICRO Pocket2: 可視光(VIS)をIRフレームに合わせてクロップ＋自前フュージョン.
+"""HIKMICRO Pocket2: 可視光(VIS)をIRフレームに合わせてクロップ＋自前合成.
 
 背景:
   Pocket2 は 熱(256x192→表示640x480) と 可視光(1600x1200) の2眼。可視光の方が
@@ -8,7 +8,7 @@
 このモジュールは:
   1) 生ラジオメトリからロゴ無しのクリーンな熱カラー画像を作る
   2) VIS を IR の画角に合わせてクロップ／位置合わせ（VISの方が広画角なので"切り出し"）
-  3) 自前フュージョン（熱カラー＋VISの高周波ディテール）を作る
+  3) 自前合成（熱カラー＋VISの高周波ディテール）を作る
 
 位置合わせ手法:
   IR合成画像の輪郭 = カメラが整列済みの可視光エッジ。VISエッジを IR合成エッジに
@@ -435,7 +435,7 @@ def warp_vis(vis_color: np.ndarray, reg: dict) -> np.ndarray:
 
 
 # ---------------------------------------------------------------- #
-# フュージョン
+# 合成
 # ---------------------------------------------------------------- #
 def fusion_detail(thermal_color: np.ndarray, vis_aligned: np.ndarray,
                   amount: float = 0.7) -> np.ndarray:
@@ -458,7 +458,7 @@ def process(ir_jpeg: str, vis_jpeg: str, out_prefix: str,
             t_min: float | None = None, t_max: float | None = None,
             palette: str = "arctic", denoise: int = 35,
             html: bool = False, html_embed_js: bool = False) -> dict:
-    """IR_jpeg(メーカー合成) と VIS_jpeg から, VISクロップ/フュージョンを出力."""
+    """IR_jpeg(メーカー合成) と VIS_jpeg から, VISクロップ/合成画像を出力."""
     ir_gray = cv2.imread(ir_jpeg, cv2.IMREAD_GRAYSCALE)
     vis_color = cv2.imread(vis_jpeg, cv2.IMREAD_COLOR)
     vis_gray = cv2.cvtColor(vis_color, cv2.COLOR_BGR2GRAY)
@@ -501,7 +501,7 @@ def process(ir_jpeg: str, vis_jpeg: str, out_prefix: str,
     reg = register_vis_to_ir(ir_gray, vis_gray, refine=True)
     vis_aligned = warp_vis(vis_color, reg)
 
-    # 出力: 通常用途では可視光とフュージョンの2枚だけで十分。
+    # 出力: 通常用途では可視光と合成画像の2枚だけで十分。
     outs = {}
     outs["visible"] = out_prefix + "_visible.png"
     outs["fusion"] = out_prefix + "_fusion.png"
@@ -522,7 +522,7 @@ def process(ir_jpeg: str, vis_jpeg: str, out_prefix: str,
         temperature_c = None
         if t_min is not None and t_max is not None:
             temperature_c = ext.to_celsius(t_min, t_max)
-        # HTML の背景は fusion 画像（外形エッジ融合済み）。その上に透明な hover 格子を
+        # HTML の背景は合成画像（外形エッジ重畳済み）。その上に透明な hover 格子を
         # 重ね、各画素の raw/温度をマウスオーバーで読めるようにする。
         export_plotly_html(
             raw,
@@ -558,7 +558,7 @@ def process(ir_jpeg: str, vis_jpeg: str, out_prefix: str,
 
 def process_all_palettes(ir_jpeg: str, vis_jpeg: str, out_dir: str,
                          denoise: int = 35) -> list:
-    """全パレットでフュージョン画像を出力（試し比較用）。out_dir に <画像名>_<palette>.png."""
+    """全パレットで合成画像を出力（試し比較用）。out_dir に <画像名>_<palette>.png."""
     import os
     os.makedirs(out_dir, exist_ok=True)
     ir_gray = cv2.imread(ir_jpeg, cv2.IMREAD_GRAYSCALE)
@@ -580,7 +580,7 @@ def process_all_palettes(ir_jpeg: str, vis_jpeg: str, out_dir: str,
 
 if __name__ == "__main__":
     import argparse, os
-    p = argparse.ArgumentParser(description="VIS を IR にクロップ整列して自前フュージョン")
+    p = argparse.ArgumentParser(description="VIS を IR にクロップ整列して自前合成")
     p.add_argument("ir", help="メーカー合成 IR JPEG (HM*.jpeg)")
     p.add_argument("vis", help="可視光 JPEG (HM*.VIS.jpeg)")
     p.add_argument("-o", "--out", default=None,
@@ -600,7 +600,7 @@ if __name__ == "__main__":
     p.add_argument("--showcase", action="store_true",
                    help="全パレットの一覧画像も出力")
     p.add_argument("--all-palettes", action="store_true",
-                   help="全パレットでフュージョン画像を output/palettes/ に個別出力")
+                   help="全パレットで合成画像を output/palettes/ に個別出力")
     args = p.parse_args()
     module_out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
 
