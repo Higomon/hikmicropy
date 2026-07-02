@@ -5,16 +5,24 @@
 A Python package that extracts per-pixel temperature data from HIKMICRO Pocket2 radiometric
 JPEG files and produces detail-fused images and interactive temperature maps.
 
+## ⚠️ Required: visible-image capture
+
+**Before capturing, enable saving the visible image on the camera.**
+
+Example output files
+
+- IR image … `HM****.jpeg`
+- Visible image … `HM****.VIS.jpeg`
+
+Without it, the fusion image cannot be produced.
+
+## Overview
+
 A `HM****.jpeg` saved by the HIKMICRO Pocket2 embeds a per-pixel raw sensor array (radiometric
 data) in addition to the display image. The raw values are not temperatures on their own, so the
 tool extracts them and calibrates to degrees Celsius using the temperature scale bar burned into
 the photo. The intended use is detecting relatively cold regions on surfaces (e.g. moisture from
 water leaks).
-
-> **[Required camera setting]** Fusion requires the visible-light image. **Before capturing, confirm
-> on the camera that it is set to also save the visible image, so that an `HM****.VIS.jpeg` is written
-> alongside the IR file.** If this setting is off, no `*.VIS.jpeg` is produced, and the edge-fused image
-> and the aligned visible output cannot be generated.
 
 ## Example output
 
