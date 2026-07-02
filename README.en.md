@@ -28,29 +28,27 @@ Without it, the composite image cannot be produced.
 
 A `HM****.jpeg` saved by the HIKMICRO Pocket2 embeds a per-pixel raw sensor array (radiometric
 data) in addition to the display image. The raw values are not temperatures on their own, so the
-tool extracts them and calibrates to degrees Celsius using the temperature scale bar burned into
-the photo. The intended use is detecting relatively cold regions on surfaces (e.g. moisture from
-water leaks).
-
-![Temperature scale (legend color bar)](docs/images/scale_bar.en.png)
-
-The **temperature scale** is the legend color bar and its Max / Min values in the camera's standard
-image (above). The tool calibrates raw values to °C using these numbers.
+tool extracts them and calibrates to degrees Celsius against that image's Max / Min temperatures.
+The intended use is detecting relatively cold regions on surfaces (e.g. moisture from water leaks).
 
 ## Example output
 
 `process` **produces the visible image and the composite image as a pair**. The composite image overlays
 the visible edges on the thermal color map, so structure and temperature can be read together.
-**Unlike the camera's own export, the output images carry no HIKMICRO logo.**
 
-| Visible (aligned to the IR frame) | Thermal only (color map) | Composite (thermal color + structural edges) |
-|---|---|---|
-| ![visible](samples/example_visible.png) | ![thermal only](samples/example_thermal.png) | ![composite](samples/example_fusion.png) |
+![Composite output (thermal color + structural edges)](samples/example_fusion.png)
+
+Compared with the camera's own export:
+
+![Manufacturer standard output and hikmicropy composite output](docs/images/manufacturer_vs_hikmicropy.en.png)
 
 The thermal-only image shows the temperature distribution, but structural boundaries are harder to
-read. The composite image overlays structural edges from the visible image, making it easier to
-relate temperature patterns to the scene. The thermal-only and composite images show the Max/Min
-scale bar top-left and the capture time bottom-right.
+read. Overlaying structural edges from the visible image makes it easier to relate temperature
+patterns to the scene.
+
+| Visible (aligned to the IR frame) | Thermal only (color map) |
+|---|---|
+| ![visible](samples/example_visible.png) | ![thermal only](samples/example_thermal.png) |
 
 With `--html`, the package also writes a Plotly HTML view over the composite image. Hovering over the
 image shows the nearest pixel's estimated temperature and raw value in a tooltip.
@@ -61,7 +59,7 @@ image shows the nearest pixel's estimated temperature and raw value in a tooltip
 
 - Extract the **raw sensor array (256×192 `uint16`)** from the radiometric JPEG.
 - Convert to °C with an **image-specific two-point linear calibration** from the scale bar.
-- Align the visible image to the IR frame (scale + translation only, no rotation) and **fuse the
+- Align the visible image to the IR frame (scale + translation only, no rotation) and **overlay the
   structural edges**.
 - **Output the visible and composite images together** (composite output requires the visible image).
 - **Selectable color palettes** (default `arctic`, which renders cold/damp areas in blue).
@@ -95,19 +93,6 @@ pip install -e .
 pip install -e .            # core
 pip install -e ".[viz]"     # + matplotlib (optional, for HikmicroExtractor.plot)
 ```
-
-### Tesseract (only if using OCR, optional)
-
-The Tesseract binary is needed only to read the temperature scale bar (the legend color bar shown in Overview) by OCR.
-
-| OS | Install |
-|---|---|
-| Windows | `conda install -c conda-forge tesseract`, or the UB Mannheim installer |
-| macOS | `brew install tesseract` |
-| Linux | `apt install tesseract-ocr`, etc. |
-
-OCR is optional. Temperatures can be supplied with `--tmin/--tmax`, which is recommended for
-quantitative work.
 
 ## Usage
 
@@ -154,9 +139,27 @@ T(°C) = t_min + (raw − raw_min) / (raw_max − raw_min) × (t_max − t_min)
   requires known-temperature reference bodies or the vendor's per-pixel CSV.
 - This is not a manufacturer-published radiometric formula.
 
-Provide the scale via `--tmin/--tmax` (recommended) or OCR. OCR assumes the **Pocket2 overlay
-layout** and may fail on other models/resolutions. The recorded `ocr_confidence` is an OCR
-agreement ratio, not a guarantee of temperature correctness.
+Provide the scale via `--tmin/--tmax` (recommended) or OCR.
+
+## Tesseract (only if using OCR, optional)
+
+The Tesseract binary is needed only when reading the temperature scale automatically by OCR.
+
+![Temperature scale (legend color bar)](docs/images/scale_bar.en.png)
+
+The **temperature scale** is the legend color bar and its Max / Min values in the camera's standard
+image. OCR reads this display and uses it for the two-point linear calibration from raw values to °C.
+
+| OS | Install |
+|---|---|
+| Windows | `conda install -c conda-forge tesseract`, or the UB Mannheim installer |
+| macOS | `brew install tesseract` |
+| Linux | `apt install tesseract-ocr`, etc. |
+
+OCR is optional. Temperatures can be supplied with `--tmin/--tmax`, which is recommended for
+quantitative work. OCR assumes the **Pocket2 overlay layout** and may fail on other
+models/resolutions. The recorded `ocr_confidence` is an OCR agreement ratio, not a guarantee of
+temperature correctness.
 
 ## License
 

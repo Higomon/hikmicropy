@@ -28,27 +28,26 @@ hikmicropy は画素ごとの温度を保持するため、撮影後に任意点
 
 HIKMICRO Pocket2 が保存する `HM****.jpeg` には、表示用の画像に加えて画素ごとの生センサ値
 （放射測定データ）が埋め込まれている。生値はそのままでは温度ではないため、本ツールは生値を
-抽出し、写真に焼き込まれた温度目盛りを用いて℃へ較正する。壁面などの相対的に低温な領域（例:
+抽出し、画像ごとの Max / Min 温度へ合わせて℃へ較正する。壁面などの相対的に低温な領域（例:
 雨漏りによる含水部）の検出を主な用途に想定する。
-
-![温度目盛り（凡例カラーバー）](docs/images/scale_bar.ja.png)
-
-**温度目盛り**とは、メーカー標準出力画像の左にある凡例カラーバーとその Max / Min 値を指す（上図）。
-本ツールはこの値を用いて生値を℃へ較正する。
 
 ## 出力例
 
 `process` は **可視光画像と合成画像を対で出力する**。合成画像は温度カラーマップに
-可視画像の外形エッジを重ねたもので、構造とともに温度分布を判読できる。**カメラ内蔵の書き出しと
-異なり、出力画像に HIKMICRO のロゴは入らない。**
+可視画像の外形エッジを重ねたもので、構造とともに温度分布を判読できる。
 
-| 可視光（IR 画角に整列） | IRのみ（温度カラー） | 合成（温度カラー＋外形エッジ） |
-|---|---|---|
-| ![visible](samples/example_visible.png) | ![IRのみ](samples/example_thermal.png) | ![合成](samples/example_fusion.png) |
+![合成画像（温度カラー＋外形エッジ）](samples/example_fusion.png)
 
-IRのみの画像では温度分布は読めるが、部材の境界や汚れ・目地などの構造は判読しにくい。合成画像では
-可視画像由来の外形エッジを重ねることで、温度分布を構造と対応づけて見られる。IRのみ/合成画像の
-左上には Max/Min の温度目盛り、右下には撮影日時を表示する。
+カメラ内蔵の書き出しとの違いは次の通りである。
+
+![メーカー標準出力と hikmicropy 合成出力の比較](docs/images/manufacturer_vs_hikmicropy.ja.png)
+
+合成前の IR のみ画像では温度分布は読めるが、部材の境界や汚れ・目地などの構造は判読しにくい。
+可視画像由来の外形エッジを重ねることで、温度分布を構造と対応づけて見られる。
+
+| 可視光（IR 画角に整列） | IRのみ（温度カラー） |
+|---|---|
+| ![visible](samples/example_visible.png) | ![IRのみ](samples/example_thermal.png) |
 
 `--html` 指定時は、合成画像を背景にした Plotly HTML も出力できる。画像上をマウスオーバーすると、
 近傍画素の推定温度と生値がツールチップで表示される。
@@ -91,18 +90,6 @@ pip install -e .
 pip install -e .            # コア
 pip install -e ".[viz]"     # + matplotlib（HikmicroExtractor.plot 用、任意）
 ```
-
-### Tesseract（OCR を使う場合のみ、任意）
-
-温度目盛り（「概要」に示した凡例カラーバー）を OCR で自動読み取りする場合のみ、Tesseract 本体が必要である。
-
-| OS | 導入方法 |
-|---|---|
-| Windows | `conda install -c conda-forge tesseract`、または UB Mannheim 版インストーラ |
-| macOS | `brew install tesseract` |
-| Linux | `apt install tesseract-ocr` 等 |
-
-OCR は任意である。温度は `--tmin/--tmax` で手入力でき、定量用途ではこちらを推奨する。
 
 ## 使い方
 
@@ -147,9 +134,26 @@ T(℃) = t_min + (raw − raw_min) / (raw_max − raw_min) × (t_max − t_min)
   近似が妥当と見込まれるが、厳密な数値化には既知温度の基準体または解析ソフトの CSV を要する。
 - 本較正はメーカー公式の放射測定式ではない。
 
-温度目盛りは `--tmin/--tmax`（推奨）または OCR で与える。OCR は **Pocket2 の表示レイアウトを前提**と
-するため他機種・他解像度では失敗しうる。記録される `ocr_confidence` は OCR の読み取り一致度であり、
-温度の正しさそのものを保証するものではない。
+温度目盛りは `--tmin/--tmax`（推奨）または OCR で与える。
+
+## Tesseract（OCR を使う場合のみ、任意）
+
+OCR で温度目盛りを自動読み取りする場合のみ、Tesseract 本体が必要である。
+
+![温度目盛り（凡例カラーバー）](docs/images/scale_bar.ja.png)
+
+**温度目盛り**とは、メーカー標準出力画像の左にある凡例カラーバーとその Max / Min 値を指す。
+OCR はこの表示を読み取り、生値から℃への2点線形較正に使う。
+
+| OS | 導入方法 |
+|---|---|
+| Windows | `conda install -c conda-forge tesseract`、または UB Mannheim 版インストーラ |
+| macOS | `brew install tesseract` |
+| Linux | `apt install tesseract-ocr` 等 |
+
+OCR は任意である。温度は `--tmin/--tmax` で手入力でき、定量用途ではこちらを推奨する。OCR は
+**Pocket2 の表示レイアウトを前提**とするため他機種・他解像度では失敗しうる。記録される
+`ocr_confidence` は OCR の読み取り一致度であり、温度の正しさそのものを保証するものではない。
 
 ## ライセンス
 
