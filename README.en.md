@@ -11,6 +11,11 @@ tool extracts them and calibrates to degrees Celsius using the temperature scale
 the photo. The intended use is detecting relatively cold regions on surfaces (e.g. moisture from
 water leaks).
 
+> **[Required camera setting]** Fusion requires the visible-light image. **Before capturing, confirm
+> on the camera that it is set to also save the visible image, so that an `HM****.VIS.jpeg` is written
+> alongside the IR file.** If this setting is off, no `*.VIS.jpeg` is produced, and the edge-fused image
+> and the aligned visible output cannot be generated.
+
 ## Example output
 
 `process` **produces the visible image and the fusion image as a pair**. The fusion image overlays
