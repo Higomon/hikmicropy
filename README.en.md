@@ -5,6 +5,14 @@
 A Python package that extracts per-pixel temperature data from HIKMICRO Pocket2 radiometric
 JPEG files and produces detail-fused images and interactive temperature maps.
 
+## Why hikmicropy
+
+- You want to read the temperature at **any point, even after capture**.
+- You do not want images that carry the **manufacturer logo**.
+
+hikmicropy preserves the per-pixel temperature, so any point can be inspected after capture (hover
+in the interactive HTML), and it outputs images free of logos and on-screen UI.
+
 ## ⚠️ Required: visible-image capture
 
 **Before capturing, enable saving the visible image on the camera.**
