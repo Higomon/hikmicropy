@@ -36,8 +36,6 @@ HIKMICRO Pocket2 が保存する `HM****.jpeg` には、表示用の画像に加
 `process` は **可視光画像と合成画像を対で出力する**。合成画像は温度カラーマップに
 可視画像の外形エッジを重ねたもので、構造とともに温度分布を判読できる。
 
-![合成画像（温度カラー＋外形エッジ）](samples/example_fusion.png)
-
 カメラ内蔵の書き出しとの違いは次の通りである。
 
 ![メーカー標準出力と hikmicropy 合成出力の比較](docs/images/manufacturer_vs_hikmicropy.ja.png)
@@ -136,9 +134,9 @@ T(℃) = t_min + (raw − raw_min) / (raw_max − raw_min) × (t_max − t_min)
 
 温度目盛りは `--tmin/--tmax`（推奨）または OCR で与える。
 
-## Tesseract（OCR を使う場合のみ、任意）
+## Tesseract（OCR 自動読み取りに必要）
 
-OCR で温度目盛りを自動読み取りする場合のみ、Tesseract 本体が必要である。
+温度目盛りを OCR で自動読み取りするには、Tesseract 本体が必要である。
 
 ![温度目盛り（凡例カラーバー）](docs/images/scale_bar.ja.png)
 
@@ -151,8 +149,8 @@ OCR はこの表示を読み取り、生値から℃への2点線形較正に使
 | macOS | `brew install tesseract` |
 | Linux | `apt install tesseract-ocr` 等 |
 
-OCR は任意である。温度は `--tmin/--tmax` で手入力でき、定量用途ではこちらを推奨する。OCR は
-**Pocket2 の表示レイアウトを前提**とするため他機種・他解像度では失敗しうる。記録される
+Tesseract がない場合は `--tmin/--tmax` で温度目盛りを手入力する。定量用途では手入力を推奨する。
+OCR は **Pocket2 の表示レイアウトを前提**とするため他機種・他解像度では失敗しうる。記録される
 `ocr_confidence` は OCR の読み取り一致度であり、温度の正しさそのものを保証するものではない。
 
 ## ライセンス

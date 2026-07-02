@@ -36,8 +36,6 @@ The intended use is detecting relatively cold regions on surfaces (e.g. moisture
 `process` **produces the visible image and the composite image as a pair**. The composite image overlays
 the visible edges on the thermal color map, so structure and temperature can be read together.
 
-![Composite output (thermal color + structural edges)](samples/example_fusion.png)
-
 Compared with the camera's own export:
 
 ![Manufacturer standard output and hikmicropy composite output](docs/images/manufacturer_vs_hikmicropy.en.png)
@@ -141,9 +139,9 @@ T(°C) = t_min + (raw − raw_min) / (raw_max − raw_min) × (t_max − t_min)
 
 Provide the scale via `--tmin/--tmax` (recommended) or OCR.
 
-## Tesseract (only if using OCR, optional)
+## Tesseract (required for OCR auto-reading)
 
-The Tesseract binary is needed only when reading the temperature scale automatically by OCR.
+Reading the temperature scale automatically by OCR requires the Tesseract binary.
 
 ![Temperature scale (legend color bar)](docs/images/scale_bar.en.png)
 
@@ -156,8 +154,8 @@ image. OCR reads this display and uses it for the two-point linear calibration f
 | macOS | `brew install tesseract` |
 | Linux | `apt install tesseract-ocr`, etc. |
 
-OCR is optional. Temperatures can be supplied with `--tmin/--tmax`, which is recommended for
-quantitative work. OCR assumes the **Pocket2 overlay layout** and may fail on other
+Without Tesseract, provide the temperature scale manually with `--tmin/--tmax`. Manual input is
+recommended for quantitative work. OCR assumes the **Pocket2 overlay layout** and may fail on other
 models/resolutions. The recorded `ocr_confidence` is an OCR agreement ratio, not a guarantee of
 temperature correctness.
 
