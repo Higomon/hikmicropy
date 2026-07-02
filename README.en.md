@@ -3,7 +3,7 @@
 [日本語](README.md) ・ **English**
 
 A Python package that extracts per-pixel temperature data from HIKMICRO Pocket2 radiometric
-JPEG files and produces detail-fused images and interactive temperature maps.
+JPEG files and produces composite images and interactive temperature maps.
 
 ## Why hikmicropy
 
@@ -22,7 +22,7 @@ Example output files
 - IR image … `HM****.jpeg`
 - Visible image … `HM****.VIS.jpeg`
 
-Without it, the fusion image cannot be produced.
+Without it, the composite image cannot be produced.
 
 ## Overview
 
@@ -39,18 +39,20 @@ image (above). The tool calibrates raw values to °C using these numbers.
 
 ## Example output
 
-`process` **produces the visible image and the fusion image as a pair**. The fusion image overlays
+`process` **produces the visible image and the composite image as a pair**. The composite image overlays
 the visible edges on the thermal color map, so structure and temperature can be read together.
 **Unlike the camera's own export, the output images carry no HIKMICRO logo.**
 
-| Visible (aligned to the IR frame) | Fusion (thermal color + structural edges) |
-|---|---|
-| ![visible](samples/example_visible.png) | ![fusion](samples/example_fusion.png) |
+| Visible (aligned to the IR frame) | Thermal only (color map) | Composite (thermal color + structural edges) |
+|---|---|---|
+| ![visible](samples/example_visible.png) | ![thermal only](samples/example_thermal.png) | ![composite](samples/example_fusion.png) |
 
-The Max/Min scale bar is shown top-left and the capture time bottom-right. Structural edges come
-from the visible image; the thermal hue (temperature) is preserved.
+The thermal-only image shows the temperature distribution, but structural boundaries are harder to
+read. The composite image overlays structural edges from the visible image, making it easier to
+relate temperature patterns to the scene. The thermal-only and composite images show the Max/Min
+scale bar top-left and the capture time bottom-right.
 
-With `--html`, the package also writes a Plotly HTML view over the fusion image. Hovering over the
+With `--html`, the package also writes a Plotly HTML view over the composite image. Hovering over the
 image shows the nearest pixel's estimated temperature and raw value in a tooltip.
 
 ![Plotly HTML temperature hover](docs/images/plotly_hover.gif)
@@ -61,9 +63,9 @@ image shows the nearest pixel's estimated temperature and raw value in a tooltip
 - Convert to °C with an **image-specific two-point linear calibration** from the scale bar.
 - Align the visible image to the IR frame (scale + translation only, no rotation) and **fuse the
   structural edges**.
-- **Output the visible and fusion images together** (fusion requires the visible image).
+- **Output the visible and composite images together** (composite output requires the visible image).
 - **Selectable color palettes** (default `arctic`, which renders cold/damp areas in blue).
-- Export an **interactive HTML (Plotly) using the fusion image as the background**, where
+- Export an **interactive HTML (Plotly) using the composite image as the background**, where
   **hovering over any point reports that pixel's estimated temperature and raw value**.
 - Record processing metadata (calibration provenance, OCR agreement) as JSON.
 - Produce output images **without any manufacturer logo**.
@@ -110,19 +112,19 @@ quantitative work.
 ## Usage
 
 ```bash
-# One IR/VIS pair (writes fusion, visible, metadata, and HTML)
+# One IR/VIS pair (writes composite, visible, metadata, and HTML)
 hikmicropy process IR.jpeg IR.VIS.jpeg --palette arctic --out-dir output --html
 
 # Batch a folder (auto-pairs HM*.jpeg with HM*.VIS.jpeg)
 hikmicropy batch ./photos --palette arctic --out-dir output --html
 
-# CSV / HTML from a single IR image (no VIS; fusion is not produced)
+# CSV / HTML from a single IR image (no VIS; composite output is not produced)
 hikmicropy export IR.jpeg --tmin 31.4 --tmax 33.8 --csv --html
 ```
 
-`process` writes `*_fusion.png`, `*_visible.png`, and `*_metadata.json` per pair, adding
+`process` writes `*_fusion.png` (the composite image), `*_visible.png`, and `*_metadata.json` per pair, adding
 `*_thermal.html` with `--html`. **A visible image (`*.VIS.jpeg`) is required to obtain the
-edge-fused image**; without it, use `export` (CSV/HTML only).
+edge-composited image**; without it, use `export` (CSV/HTML only).
 
 ## Python API
 
