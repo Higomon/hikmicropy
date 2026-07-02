@@ -32,6 +32,11 @@ tool extracts them and calibrates to degrees Celsius using the temperature scale
 the photo. The intended use is detecting relatively cold regions on surfaces (e.g. moisture from
 water leaks).
 
+![Temperature scale (legend color bar)](docs/images/scale_bar.en.png)
+
+The **temperature scale** is the legend color bar and its Max / Min values in the camera's standard
+image (above). The tool calibrates raw values to °C using these numbers.
+
 ## Example output
 
 `process` **produces the visible image and the fusion image as a pair**. The fusion image overlays
@@ -86,7 +91,7 @@ pip install -e ".[viz]"     # + matplotlib (optional, for HikmicroExtractor.plot
 
 ### Tesseract (only if using OCR, optional)
 
-The Tesseract binary is needed only to read the scale bar by OCR.
+The Tesseract binary is needed only to read the temperature scale bar (the legend color bar shown in Overview) by OCR.
 
 | OS | Install |
 |---|---|
